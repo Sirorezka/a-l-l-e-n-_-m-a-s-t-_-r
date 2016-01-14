@@ -93,7 +93,10 @@ if __name__ == '__main__':
     #read glove
     word2vec = {}
     glove_data_filename = "glove.6B." + str(args.N) + "d.txt"
-    glove_data_filename = 
+    #glove_data_filename = "glove.840B.300d.txt"
+    glove_data_filename = "glove.twitter.27B.200d.txt"
+    words_reading_err = 0
+    args.N = 200
     with codecs.open("data/glove/" + glove_data_filename ,"r","utf-8") as f:
     #with codecs.open("data/glove/glove.6B.50d.txt","r","utf-8") as f:
         print ("--- reading data ---")
@@ -101,11 +104,15 @@ if __name__ == '__main__':
         for line in f.readlines():
            # print ("sdf")
             l = line.split()
-            word2vec[l[0]] = list(map(float, l[1:]))
+            try:
+                word2vec[l[0]] = list(map(float, l[1:]))
+            except:
+                words_reading_err = words_reading_err + 1
 
 
         print ("data loaded")
         print (round((time.time() - st_time)/60,2)," min")
+        print ("words reading errors:", words_reading_err)
 
     #predict
     pred_answs, pred_probs = predict_answers(data, word2vec, args.N)
