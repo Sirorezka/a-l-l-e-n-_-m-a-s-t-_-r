@@ -29,7 +29,7 @@ def predict(data, docs_per_q):
     docs_tf, words_idf = utils.get_docstf_idf(wiki_docs_dir)
     
     res = []
-
+    doc_score = [["A","B","C","D"]]
     for index, row in data.iterrows():
         #get answers words
         w_A = set(utils.tokenize(row['answerA']))
@@ -59,13 +59,19 @@ def predict(data, docs_per_q):
                     sc_D += 1. * docs_tf[d][w] * words_idf[w]
 
         res.append(['A','B','C','D'][np.argmax([sc_A, sc_B, sc_C, sc_D])])
-        
-    return res
+        doc_score.append([sc_A, sc_B, sc_C, sc_D])
+    return res, doc_score
+
+
+def evaluate_score (y_model, y_real):
+    model_score = sum(y_model==y_real)/len(y_real)
+    return model_score
+
 
 if __name__ == '__main__':
     #parsing input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fname', type=str, default='validation_set.tsv', help='file name with data')
+    parser.add_argument('--fname', type=str, default='joined_set.tsv', help='file name with data')
     parser.add_argument('--docs_per_q', type=int, default= 10, help='number of docs to consider when ranking quesitons')
     parser.add_argument('--get_data', type=int, default= 0, help='flag to get wiki data for IR')
     args = parser.parse_args()
@@ -80,10 +86,14 @@ if __name__ == '__main__':
     data = pd.read_csv('data/' + args.fname, sep = '\t' )
     #predict
     print("run: predicting data")
-    res = predict(data, args.docs_per_q)
+    res, prob_scores = predict(data, args.docs_per_q)
+    prob_scores = np.array(prob_scores).flatten()
+    prob_scores = np.resize (prob_scores,(len(prob_scores)/4,4))
+    print (prob_scores[0:100,:])
     #save result
     pd.DataFrame({'id': list(data['id']), 'correctAnswer': res})[['id', 'correctAnswer']].to_csv("predictions/prediction_ck12.csv", index = False)
-    
+    pd.DataFrame({'id': list(data['id']),'probA': prob_scores[1:,0],'probB': prob_scores[1:,1],'probC': prob_scores[1:,2],'probD': prob_scores[1:,3]}).to_csv("predictions/prob_prediction_ck12.csv", index = False)
+
 
 
     

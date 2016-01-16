@@ -88,7 +88,7 @@ def get_docstf_idf(dir_data):
         for path, doc_tf in docs_tf.items():
             if w in doc_tf:
                 docs_with_w += 1
-        idf[w] = log(len(docs_tf)/docs_with_w)
+        idf[w] = log(len(docs_tf)/(docs_with_w))
 
     return docs_tf, idf
 
@@ -111,3 +111,4 @@ def get_docs_importance_for_question(question, dosc_tf, word_idf, max_docs = Non
         return doc_importance[:max_docs]
     else:
         return doc_importance
+

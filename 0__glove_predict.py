@@ -91,12 +91,14 @@ if __name__ == '__main__':
     data = pd.read_csv('data/' + args.fname, sep = '\t' )
     
     #read glove
+    args.N = 300
     word2vec = {}
     glove_data_filename = "glove.6B." + str(args.N) + "d.txt"
     #glove_data_filename = "glove.840B.300d.txt"
-    glove_data_filename = "glove.twitter.27B.200d.txt"
+    #glove_data_filename = "glove.twitter.27B.200d.txt"
+    
+
     words_reading_err = 0
-    args.N = 200
     with codecs.open("data/glove/" + glove_data_filename ,"r","utf-8") as f:
     #with codecs.open("data/glove/glove.6B.50d.txt","r","utf-8") as f:
         print ("--- reading data ---")
