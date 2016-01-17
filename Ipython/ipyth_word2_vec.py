@@ -7,6 +7,8 @@ from ipyth_utils import tokenize
 import codecs
 import time
 
+
+## return word2vec(word)
 def getword2vecval (N,w,word2vec):
     i = 0
     resh_w2v = []
@@ -27,7 +29,10 @@ def evaluate_score (y_model, y_real):
     return model_score
     
 
-def predict_cosine_answers(data, word2vec, N):
+##
+## N - dimensionality of word2vec 
+##
+def predict_cosine_answers(data, word2vec, N, ngram):
 
     stop = stopwords.words('english')
 
@@ -36,7 +41,7 @@ def predict_cosine_answers(data, word2vec, N):
     for i in range(data.shape[0]):
         #calculate word2vec for question
         q_vec = np.zeros(N, dtype=float)
-        for w in tokenize(data['question'][i]):
+        for w in tokenize(data['question'][i], ngram):
             if w.lower() in word2vec and w.lower() not in stop:
                 w2 = getword2vecval (N,w.lower(),word2vec)
                 q_vec = np.add(q_vec, w2)
@@ -47,26 +52,26 @@ def predict_cosine_answers(data, word2vec, N):
         B_vec = np.zeros(N, dtype=float)
         C_vec = np.zeros(N, dtype=float)
         D_vec = np.zeros(N, dtype=float)
-        for w in tokenize(data['answerA'][i]):
+        for w in tokenize(data['answerA'][i], ngram):
             if w.lower() in word2vec  and w.lower() not in stop:
                 w2 = getword2vecval (N,w.lower(),word2vec)
                 #print (w2[0:4])
                 A_vec = np.add(A_vec,w2)
     
-        for w in tokenize(data['answerB'][i]):
+        for w in tokenize(data['answerB'][i], ngram):
             if w.lower() in word2vec and w.lower() not in stop:
                 w2 = getword2vecval (N,w.lower(),word2vec)
                 #print (w2[0:4])
                 B_vec = np.add(B_vec,w2)
             
-        for w in tokenize(data['answerC'][i]):
+        for w in tokenize(data['answerC'][i], ngram):
             if w.lower() in word2vec and w.lower() not in stop:
                 w2 = getword2vecval (N,w.lower(),word2vec)
                 #print (w2[0:4])
                 C_vec = np.add(C_vec,w2)
 
     
-        for w in tokenize(data['answerD'][i]):
+        for w in tokenize(data['answerD'][i], ngram):
             if w.lower() in word2vec and w.lower() not in stop:
                 w2 = getword2vecval (N,w.lower(),word2vec)
                 #print (w2[0:4])

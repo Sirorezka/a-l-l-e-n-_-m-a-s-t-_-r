@@ -89,7 +89,10 @@ if __name__ == '__main__':
     res, prob_scores = predict(data, args.docs_per_q)
     prob_scores = np.array(prob_scores).flatten()
     prob_scores = np.resize (prob_scores,(len(prob_scores)/4,4))
-    print (prob_scores[0:100,:])
+    y = data.iloc[0:2500,6]
+    y_pred = res[0:2500]
+    print (evaluate_score (y_pred,y))   
+
     #save result
     pd.DataFrame({'id': list(data['id']), 'correctAnswer': res})[['id', 'correctAnswer']].to_csv("predictions/prediction_ck12.csv", index = False)
     pd.DataFrame({'id': list(data['id']),'probA': prob_scores[1:,0],'probB': prob_scores[1:,1],'probC': prob_scores[1:,2],'probD': prob_scores[1:,3]}).to_csv("predictions/prob_prediction_ck12.csv", index = False)

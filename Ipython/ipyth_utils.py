@@ -5,15 +5,18 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from math import log
+from nltk.stem.snowball import SnowballStemmer
 
 
 ##
-##    Word tokenization
+##    Word tokenization, steaming, removing stop-words
 ##
-def tokenize(review, ngram, remove_stopwords = True):
+def tokenize(review, ngram, remove_stopwords = True, do_stem = True):
     # Function to convert a document to a sequence of words,
     # optionally removing stop words.  Returns a list of words.
     # 1. Remove non-letters
+    if do_stem:
+        stemmer = SnowballStemmer("english")
     review_text = re.sub("[^a-zA-Z]"," ", review)
     # 2. Convert words to lower case and split them
     words = review_text.lower().split()
@@ -21,7 +24,8 @@ def tokenize(review, ngram, remove_stopwords = True):
     if remove_stopwords:
         stops = set(stopwords.words("english"))
         words = [w for w in words if not w in stops]
-    
+        if do_stem:
+            words = list(map (lambda x: stemmer.stem(x), words))
     # 4. Find n-grams
     words_ngrams = find_ngrams(words, ngram)
 
@@ -77,8 +81,14 @@ def get_save_wiki_docs(keywords, save_folder = 'data/wiki_data/'):
         with open(os.path.join(save_folder, '_'.join(kw.split()) + '.txt'), 'wb') as f:
                 f.write(content)
 
-        
-        
+ 
+
+
+
+
+###
+###   Calculate tfidf matrix
+###     
 def get_docstf_idf(dir_data, n_gram):
     """ indexing wiki pages:
     returns {document1:{word1:tf, word2:tf ...}, ....},
@@ -94,7 +104,7 @@ def get_docstf_idf(dir_data, n_gram):
         total_w = 0
         path = os.path.join(dir_data, fname)
         doc_num = doc_num +1
-        if (doc_num % 50 ==0):
+        if (doc_num % 200 ==0):
             print (doc_num)
         #print (fname)
         #for index, line in enumerate(open(path)):
@@ -102,7 +112,10 @@ def get_docstf_idf(dir_data, n_gram):
         for word in lst:
                 vocab.add(word)
                 dd.setdefault(word, 0)
+                idf.setdefault(word, 0)
                 dd[word] += 1
+                if dd[word]==1:
+                    idf[word] += 1
                 total_w += 1 
                 
         
@@ -111,11 +124,12 @@ def get_docstf_idf(dir_data, n_gram):
         
         docs_tf[fname] = dd
     
+    print ("calculating tf-idf: ")
     for w in list(vocab):
-        docs_with_w = 0
-        for path, doc_tf in docs_tf.items():
-            if w in doc_tf:
-                docs_with_w += 1
+        docs_with_w = idf[w]
+        # for path, doc_tf in docs_tf.items():
+        #    if w in doc_tf:
+        #        docs_with_w += 1
         idf[w] = log(len(docs_tf)/(1+docs_with_w))+1
 
 
